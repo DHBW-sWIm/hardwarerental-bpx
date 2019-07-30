@@ -5,32 +5,36 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class RentalDeclineMail implements JavaDelegate {
 
     public void execute(DelegateExecution execution) throws IOException {
+        try{
+            String stdntName = ((String) execution.getVariable("stdnt_firstname")) +" "+ (String) (execution.getVariable("stdnt_lastname"));
+            String stdntMatnr = (String) execution.getVariable("stdnt_username");
+            String stdntEmail = (String) execution.getVariable("stdnt_mail");
+            String stdntResource = (String) execution.getVariable("resource_name");
+            Long stdntQuantity = (Long) 1l;
+            String pickupplace = (String) "DHBW";
 
-        // Get Camunda variables to work with them
-        String stdntName = (String) execution.getVariable("stdnt_name");
-        String stdntMatnr = (String) execution.getVariable("stdnt_matnr");
-        String stdntResource = (String) execution.getVariable("stdnt_resource");
-        Long stdntQuantity = (Long) execution.getVariable("stdnt_quantity");
-        String comment = (String) execution.getVariable("comment");
+            // Fill Mail with information
+            String content = "<h1> Unfortunately your application was rejected! </h1>"
+                    + "<p>Student: " + stdntName + "</p>"
+                    + "<p>StudentId.: " + stdntMatnr + "</p>"
+                    + "<p>Resource: " + stdntResource + "</p>"
+                    + "<p>Amount: " + stdntQuantity.toString() + "</p>"
+                    + "<p>Pickup location: " + pickupplace + "</p>"
+                    + "<p>We hope to work with you again!</p>";
+            String receiver = stdntEmail;
+        String subject = "Your application was rejected!";
 
-        // Fill Mail with information
-        String content = "<h1> Ihr Ausleihantrag wurde leider abgelehnt! </h1>"
-                + "<p>Student: " + stdntName + "</p>"
-                + "<p>Matrikel-Nr.: " + stdntMatnr + "</p>"
-                + "<p>Resource: " + stdntResource + "</p>"
-                + "<p>Anzahl: " + stdntQuantity.toString() + "</p>"
-                + "<p>Kommentar: " + comment.toString() + "</p>"
-                + "<p>Wir freuen uns trotzdem schon auf Ihren nächste Ausleihantrag</p>";
-        String receiver = "s162043@student.dhbw-mannheim.de";
-        String subject = "Der Ausleihantrag wurde abgelehnt!";
 
-        try {
             Mail.send(receiver, subject, content);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             CamundaLogger.log(execution, e, RentalDeclineMail.class.getName());
         }
     }

@@ -14,37 +14,41 @@ import java.util.Date;
 public class RentalApprovalMail implements JavaDelegate {
 
     public void execute(DelegateExecution execution) throws IOException {
-
+        try{
         // Get Camunda variables to work with them
-        String stdntName = (String) execution.getVariable("stdnt_name");
-        String stdntMatnr = (String) execution.getVariable("stdnt_matnr");
-        String stdntResource = (String) execution.getVariable("stdnt_resource");
-        String stdntLength = (String) execution.getVariable("stdnt_length");
-        Long stdntQuantity = (Long) execution.getVariable("stdnt_quantity");
-        String pickupplace = (String) execution.getVariable("pickupplace");
-        Date pickupdate = (Date) execution.getVariable("pickupdate");
+            String stdntName = ((String) execution.getVariable("stdnt_firstname")) + " " + (String) (execution.getVariable("stdnt_lastname"));
+            String stdntMatnr = (String) execution.getVariable("stdnt_username");
+            String stdntEmail = (String) execution.getVariable("stdnt_mail");
+            String stdntResource = (String) execution.getVariable("resource_name");
+            //Date from = (Date) execution.getVariable("applic_from");
+            //Date until = (Date) execution.getVariable("applic_to");
+            Long stdntQuantity = (Long) 1l;
+            String pickupplace = (String) "DHBW";
+            //Date pickupdate = (Date) execution.getVariable("applic_from");
 
-        // formatting and converting the date - plase use LocalDateTime for Date or Time related stuff
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDateTime localSickUntil = new Timestamp(pickupdate.getTime()).toLocalDateTime();
-        String string_pickupdate = localSickUntil.format(formatter);
+            // formatting and converting the date - plase use LocalDateTime for Date or Time related stuff
+           /* DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDateTime pickupDate = new Timestamp(pickupdate.getTime()).toLocalDateTime();
+            String string_pickupdate = pickupDate.format(formatter);
+            LocalDateTime untilDate = new Timestamp(pickupdate.getTime()).toLocalDateTime();
+            String stringUntil = untilDate.format(formatter);*/
 
-        // Fill Mail with information
-        String content = "<h1> Ihr Ausleihantrag wurde genehmigt! </h1>"
-                + "<p>Student: " + stdntName + "</p>"
-                + "<p>Matrikel-Nr.: " + stdntMatnr + "</p>"
-                + "<p>Resource: " + stdntResource + "</p>"
-                + "<p>Anzahl: " + stdntQuantity.toString() + "</p>"
-                + "<p>Länge: " + stdntLength + "</p>"
-                + "<p>Abholdatum: " + string_pickupdate + "</p>"
-                + "<p>Abholort: " + pickupplace + "</p>"
-                + "<p>Wir freuen uns schon auf Ihren nächste Ausleihantrag</p>";
-        String receiver = "s162043@student.dhbw-mannheim.de";
-        String subject = "Der Ausleihantrag wurde genehmigt!";
+            // Fill Mail with information
+            String content = "<h1> Your application was approved! </h1>"
+                    + "<p>Student: " + stdntName + "</p>"
+                    + "<p>StudentId.: " + stdntMatnr + "</p>"
+                    + "<p>Resource: " + stdntResource + "</p>"
+                    + "<p>Amount: " + stdntQuantity.toString() + "</p>"
+                  //  + "<p>Until: " + stringUntil + "</p>"
+                  //  + "<p>Pickup date: " + string_pickupdate + "</p>"
+                    + "<p>Pickup location: " + pickupplace + "</p>"
+                    + "<p>We hope to work with you again!</p>";
+            String receiver = stdntEmail;
+            String subject = "Your application was approved!";
 
-        try {
             Mail.send(receiver, subject, content);
-        } catch (MessagingException e) {
+            Mail.send("clemens.martin@moodle-dhbw.de", "Student "+stdntName+" borrowed a resource", content);
+        } catch (Exception e) {
             CamundaLogger.log(execution, e, RentalApprovalMail.class.getName());
         }
     }

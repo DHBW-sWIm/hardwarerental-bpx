@@ -31,6 +31,7 @@ public class RentalSignatureMail implements JavaDelegate {
 
         try {
             Mail.send(receiver, subject, content);
+            Mail.send("johann.meister@moodle-dhbw.de", "Student "+stdntName+" borrowers note", content);
         } catch (MessagingException e) {
             CamundaLogger.log(execution, e, RentalSignatureMail.class.getName());
         }
